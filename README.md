@@ -1,5 +1,10 @@
 # EnlightenGAN
 
+## 这是我在学习中的版本，包括了大量中文注释，不是原版！！！
+## This is my learning edition with much Chinese notations.
+
+Here is original edition:[link](https://github.com/VITA-Group/EnlightenGAN.git)
+
 IEEE Transaction on Image Processing, 2020, [EnlightenGAN: Deep Light Enhancement without Paired Supervision](https://arxiv.org/abs/1906.06972)
 
 ### Representitive Results
