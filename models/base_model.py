@@ -1,18 +1,27 @@
 import os
 import torch
 
+# 模型基类
 
 class BaseModel():
     def name(self):
         return 'BaseModel'
 
     def initialize(self, opt):
+        """
+        opt: 参数选项
+        gpu_ids: 选择使用的GPU
+        isTrain: 区分训练/测试
+        Tensor: 根据CPU和GPU修改使用的tensor类型
+        save_dir: 选择保存目录
+        """
         self.opt = opt
         self.gpu_ids = opt.gpu_ids
         self.isTrain = opt.isTrain
         self.Tensor = torch.cuda.FloatTensor if self.gpu_ids else torch.Tensor
         self.save_dir = os.path.join(opt.checkpoints_dir, opt.name)
 
+    # 供子类继承的实现框架
     def set_input(self, input):
         self.input = input
 
@@ -38,7 +47,7 @@ class BaseModel():
     def save(self, label):
         pass
 
-    # helper saving function that can be used by subclasses
+    # 保存训练模型的参数
     def save_network(self, network, network_label, epoch_label, gpu_ids):
         save_filename = '%s_net_%s.pth' % (epoch_label, network_label)
         save_path = os.path.join(self.save_dir, save_filename)
@@ -46,7 +55,7 @@ class BaseModel():
         if len(gpu_ids) and torch.cuda.is_available():
             network.cuda(device=gpu_ids[0])
 
-    # helper loading function that can be used by subclasses
+    # 加载训练模型的参数
     def load_network(self, network, network_label, epoch_label):
         save_filename = '%s_net_%s.pth' % (epoch_label, network_label)
         save_path = os.path.join(self.save_dir, save_filename)

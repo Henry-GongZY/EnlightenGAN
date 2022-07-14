@@ -3,6 +3,8 @@ import os
 from util import util
 import torch
 
+# 一层封装，没什么太多东西
+
 class BaseOptions():
     def __init__(self):
         self.parser = argparse.ArgumentParser()
@@ -83,11 +85,14 @@ class BaseOptions():
         self.initialized = True
 
     def parse(self):
+        
+        # 初始化，并区分是训练还是测试
         if not self.initialized:
             self.initialize()
         self.opt = self.parser.parse_args()
         self.opt.isTrain = self.isTrain   # train or test
-
+        
+        # 选择gpu
         str_ids = self.opt.gpu_ids.split(',')
         self.opt.gpu_ids = []
         for str_id in str_ids:
@@ -95,18 +100,19 @@ class BaseOptions():
             if id >= 0:
                 self.opt.gpu_ids.append(id)
         
-        # set gpu ids
+        # 将项目的gpu给到torch里
         if len(self.opt.gpu_ids) > 0:
             torch.cuda.set_device(self.opt.gpu_ids[0])
 
         args = vars(self.opt)
 
+        #打印项目的参数和赋值
         print('------------ Options -------------')
         for k, v in sorted(args.items()):
             print('%s: %s' % (str(k), str(v)))
         print('-------------- End ----------------')
 
-        # save to the disk
+        #将本次使用的参数保存到磁盘中
         expr_dir = os.path.join(self.opt.checkpoints_dir, self.opt.name)
         util.mkdirs(expr_dir)
         file_name = os.path.join(expr_dir, 'opt.txt')

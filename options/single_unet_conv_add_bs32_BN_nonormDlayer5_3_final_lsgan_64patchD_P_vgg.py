@@ -1,6 +1,8 @@
 import os
 import argparse
 
+# 分训练、测试、预测三部分
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--port", type=str, default="8097")
 parser.add_argument("--train", action='store_true')

@@ -1,4 +1,6 @@
 
+# 根据opt中的输入不同选择初始化的模型
+
 def create_model(opt):
     model = None
     print(opt.model)
