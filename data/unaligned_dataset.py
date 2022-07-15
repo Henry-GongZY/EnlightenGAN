@@ -10,7 +10,7 @@ import PIL
 from pdb import set_trace as st
 
 def pad_tensor(input):
-    
+
     height_org, width_org = input.shape[2], input.shape[3]
     divide = 16
 
@@ -57,19 +57,23 @@ class UnalignedDataset(BaseDataset):
     def initialize(self, opt):
         self.opt = opt
         self.root = opt.dataroot
+        # testA
         self.dir_A = os.path.join(opt.dataroot, opt.phase + 'A')
+        # testB
         self.dir_B = os.path.join(opt.dataroot, opt.phase + 'B')
 
         # self.A_paths = make_dataset(self.dir_A)
         # self.B_paths = make_dataset(self.dir_B)
+        # 图片和路径，两个list
         self.A_imgs, self.A_paths = store_dataset(self.dir_A)
         self.B_imgs, self.B_paths = store_dataset(self.dir_B)
 
         # self.A_paths = sorted(self.A_paths)
         # self.B_paths = sorted(self.B_paths)
+        # 分别有多少个图片
         self.A_size = len(self.A_paths)
         self.B_size = len(self.B_paths)
-        
+
         self.transform = get_transform(opt)
 
     def __getitem__(self, index):
@@ -94,7 +98,7 @@ class UnalignedDataset(BaseDataset):
         A_img = self.transform(A_img)
         B_img = self.transform(B_img)
 
-        
+
         if self.opt.resize_or_crop == 'no':
             r,g,b = A_img[0]+1, A_img[1]+1, A_img[2]+1
             A_gray = 1. - (0.299*r+0.587*g+0.114*b)/2.
@@ -104,7 +108,7 @@ class UnalignedDataset(BaseDataset):
         else:
             w = A_img.size(2)
             h = A_img.size(1)
-            
+
             # A_gray = (1./A_gray)/255.
             if (not self.opt.no_flip) and random.random() < 0.5:
                 idx = [i for i in range(A_img.size(2) - 1, -1, -1)]

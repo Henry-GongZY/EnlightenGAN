@@ -23,6 +23,7 @@ def get_transform(opt):
         osize = [int(400*zoom), int(600*zoom)]
         transform_list.append(transforms.Scale(osize, Image.BICUBIC))
         transform_list.append(transforms.RandomCrop(opt.fineSize))
+    #训练时使用的是crop
     elif opt.resize_or_crop == 'crop':
         transform_list.append(transforms.RandomCrop(opt.fineSize))
     elif opt.resize_or_crop == 'scale_width':
@@ -31,7 +32,7 @@ def get_transform(opt):
     elif opt.resize_or_crop == 'scale_width_and_crop':
         transform_list.append(transforms.Lambda(
             lambda img: __scale_width(img, opt.loadSize)))
-        transform_list.append(transforms.RandomCrop(opt.fineSize))  
+        transform_list.append(transforms.RandomCrop(opt.fineSize))
     # elif opt.resize_or_crop == 'no':
     #     osize = [384, 512]
     #     transform_list.append(transforms.Scale(osize, Image.BICUBIC))

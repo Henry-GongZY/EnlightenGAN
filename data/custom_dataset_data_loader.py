@@ -29,6 +29,7 @@ def CreateDataset(opt):
         raise ValueError("Dataset [%s] not recognized." % opt.dataset_mode)
 
     print("dataset [%s] was created" % (dataset.name()))
+    # 读取图片在这里处理
     dataset.initialize(opt)
     return dataset
 
@@ -41,7 +42,7 @@ class CustomDatasetDataLoader(BaseDataLoader):
         BaseDataLoader.initialize(self, opt)
         # 对数据集进行处理并加载
         self.dataset = CreateDataset(opt)
-        """创建 Dataloader
+        """使用dataloader加载数据
         dataset: 加载的数据集
         batchsize: 一次处理的数据量
         shuffle: 是否打乱
