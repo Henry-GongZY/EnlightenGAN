@@ -3,6 +3,8 @@ from PIL import Image
 import torchvision.transforms as transforms
 import random
 
+# 重写数据加载，基类
+
 class BaseDataset(data.Dataset):
     def __init__(self):
         super(BaseDataset, self).__init__()
@@ -15,6 +17,7 @@ class BaseDataset(data.Dataset):
 
 def get_transform(opt):
     transform_list = []
+    # 重新调整图片大小并裁剪
     if opt.resize_or_crop == 'resize_and_crop':
         zoom = 1 + 0.1*radom.randint(0,4)
         osize = [int(400*zoom), int(600*zoom)]
