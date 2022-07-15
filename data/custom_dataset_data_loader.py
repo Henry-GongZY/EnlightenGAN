@@ -3,12 +3,13 @@
 import torch.utils.data
 from data.base_data_loader import BaseDataLoader
 
-
+# 使用不同的数据加载方式(挺多没有用到的)
 def CreateDataset(opt):
     dataset = None
     if opt.dataset_mode == 'aligned':
         from data.aligned_dataset import AlignedDataset
         dataset = AlignedDataset()
+    # 默认的方式
     elif opt.dataset_mode == 'unaligned':
         from data.unaligned_dataset import UnalignedDataset
         dataset = UnalignedDataset()
@@ -31,13 +32,14 @@ def CreateDataset(opt):
     dataset.initialize(opt)
     return dataset
 
-
+# 数据集加载器
 class CustomDatasetDataLoader(BaseDataLoader):
     def name(self):
         return 'CustomDatasetDataLoader'
 
     def initialize(self, opt):
         BaseDataLoader.initialize(self, opt)
+        # 对数据集进行处理并加载
         self.dataset = CreateDataset(opt)
         self.dataloader = torch.utils.data.DataLoader(
             self.dataset,

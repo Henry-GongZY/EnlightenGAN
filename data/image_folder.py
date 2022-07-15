@@ -16,11 +16,11 @@ IMG_EXTENSIONS = [
     '.png', '.PNG', '.ppm', '.PPM', '.bmp', '.BMP',
 ]
 
-
+# 判断图像文件
 def is_image_file(filename):
     return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
 
-
+# 提取dir下所有图片
 def make_dataset(dir):
     images = []
     assert os.path.isdir(dir), '%s is not a valid directory' % dir
@@ -33,6 +33,7 @@ def make_dataset(dir):
 
     return images
 
+# 
 def store_dataset(dir):
     images = []
     all_path = []

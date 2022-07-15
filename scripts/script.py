@@ -12,7 +12,7 @@ opt = parser.parse_args()
 
 if opt.train:
 	os.system("python train.py \
-		--dataroot /final_dataset \
+		--dataroot ./final_dataset \
 		--no_dropout \
 		--name enlightening \
 		--model single \

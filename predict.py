@@ -13,14 +13,16 @@ opt.batchSize = 1  # test code only supports batchSize = 1
 opt.serial_batches = True  # no shuffle
 opt.no_flip = True  # no flip
 
+# 创建数据集loader，并加载数据集
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
+# 建立模型
 model = create_model(opt)
 visualizer = Visualizer(opt)
-# create website
+# 建立可视化网页
 web_dir = os.path.join("./ablation/", opt.name, '%s_%s' % (opt.phase, opt.which_epoch))
 webpage = html.HTML(web_dir, 'Experiment = %s, Phase = %s, Epoch = %s' % (opt.name, opt.phase, opt.which_epoch))
-# test
+
 print(len(dataset))
 for i, data in enumerate(dataset):
     model.set_input(data)
