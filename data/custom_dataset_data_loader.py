@@ -3,7 +3,7 @@
 import torch.utils.data
 from data.base_data_loader import BaseDataLoader
 
-# 使用不同的数据加载方式(挺多没有用到的)
+# 使用不同的数据加载方式(挺多没有用到的),训练时使用的是 Unaligned 进行加载
 def CreateDataset(opt):
     dataset = None
     if opt.dataset_mode == 'aligned':
@@ -41,10 +41,16 @@ class CustomDatasetDataLoader(BaseDataLoader):
         BaseDataLoader.initialize(self, opt)
         # 对数据集进行处理并加载
         self.dataset = CreateDataset(opt)
+        """创建 Dataloader
+        dataset: 加载的数据集
+        batchsize: 一次处理的数据量
+        shuffle: 是否打乱
+        num_workers: 工作线程数
+        """
         self.dataloader = torch.utils.data.DataLoader(
             self.dataset,
             batch_size=opt.batchSize,
-            shuffle=not opt.serial_batches,
+            shuffle = not opt.serial_batches,
             num_workers=int(opt.nThreads))
 
     def load_data(self):

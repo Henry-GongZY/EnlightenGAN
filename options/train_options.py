@@ -1,5 +1,6 @@
 from .base_options import BaseOptions
 
+# 继承了BaseOptions，然后添加了train中需要的参数
 
 class TrainOptions(BaseOptions):
     def initialize(self):

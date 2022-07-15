@@ -14,7 +14,7 @@ from lib.nn import SynchronizedBatchNorm2d as SynBN2d
 ###############################################################################
 
 def pad_tensor(input):
-    
+
     height_org, width_org = input.shape[2], input.shape[3]
     divide = 16
 
@@ -198,19 +198,19 @@ class GANLoss(nn.Module):
 class DiscLossWGANGP():
     def __init__(self):
         self.LAMBDA = 10
-        
+
     def name(self):
         return 'DiscLossWGAN-GP'
 
     def initialize(self, opt, tensor):
         # DiscLossLS.initialize(self, opt, tensor)
         self.LAMBDA = 10
-        
+
     # def get_g_loss(self, net, realA, fakeB):
     #     # First, G(A) should fake the discriminator
     #     self.D_fake = net.forward(fakeB)
     #     return -self.D_fake.mean()
-        
+
     def calc_gradient_penalty(self, netD, real_data, fake_data):
         alpha = torch.rand(1, 1)
         alpha = alpha.expand(real_data.size())
@@ -220,7 +220,7 @@ class DiscLossWGANGP():
 
         interpolates = interpolates.cuda()
         interpolates = Variable(interpolates, requires_grad=True)
-        
+
         disc_interpolates = netD.forward(interpolates)
 
         gradients = torch.autograd.grad(outputs=disc_interpolates, inputs=interpolates,
@@ -344,7 +344,7 @@ class UnetGenerator(nn.Module):
         unet_block = UnetSkipConnectionBlock(ngf * 2, ngf * 4, unet_block, norm_layer=norm_layer, opt=opt)
         unet_block = UnetSkipConnectionBlock(ngf, ngf * 2, unet_block, norm_layer=norm_layer, opt=opt)
         unet_block = UnetSkipConnectionBlock(output_nc, ngf, unet_block, outermost=True, norm_layer=norm_layer, opt=opt)
-        
+
         if skip == True:
             skipmodule = SkipModule(unet_block, opt)
             self.model = skipmodule
@@ -590,7 +590,6 @@ class FCDiscriminator(nn.Module):
             output = self.sigmoid(output)
         return output
 
-
 class Unet_resize_conv(nn.Module):
     def __init__(self, opt, skip):
         super(Unet_resize_conv, self).__init__()
@@ -755,7 +754,7 @@ class Unet_resize_conv(nn.Module):
             x = self.bn5_1(self.LReLU5_1(self.conv5_1(x)))
             x = x*gray_5 if self.opt.self_attention else x
             conv5 = self.bn5_2(self.LReLU5_2(self.conv5_2(x)))
-            
+
             conv5 = F.upsample(conv5, scale_factor=2, mode='bilinear')
             conv4 = conv4*gray_4 if self.opt.self_attention else conv4
             up6 = torch.cat([self.deconv5(conv5), conv4], 1)
@@ -808,8 +807,8 @@ class Unet_resize_conv(nn.Module):
 
             if self.opt.linear:
                 output = output/torch.max(torch.abs(output))
-            
-                
+
+
         elif self.opt.use_norm == 0:
             if self.opt.self_attention:
                 x = self.LReLU1_1(self.conv1_1(torch.cat((input, gray), 1)))
@@ -859,7 +858,7 @@ class Unet_resize_conv(nn.Module):
             conv9 = self.LReLU9_2(self.conv9_2(x))
 
             latent = self.conv10(conv9)
-            
+
             if self.opt.times_residual:
                 latent = latent*gray
 
@@ -885,7 +884,7 @@ class Unet_resize_conv(nn.Module):
 
             if self.opt.linear:
                 output = output/torch.max(torch.abs(output))
-        
+
         output = pad_tensor_back(output, pad_left, pad_right, pad_top, pad_bottom)
         latent = pad_tensor_back(latent, pad_left, pad_right, pad_top, pad_bottom)
         gray = pad_tensor_back(gray, pad_left, pad_right, pad_top, pad_bottom)
@@ -980,10 +979,10 @@ class Vgg16(nn.Module):
         if opt.vgg_choose != "no_maxpool":
             if opt.vgg_maxpooling:
                 h = F.max_pool2d(h, kernel_size=2, stride=2)
-        
+
         relu5_1 = F.relu(self.conv5_1(h), inplace=True)
         relu5_2 = F.relu(self.conv5_2(relu5_1), inplace=True)
-        conv5_3 = self.conv5_3(relu5_2) 
+        conv5_3 = self.conv5_3(relu5_2)
         h = F.relu(conv5_3, inplace=True)
         relu5_3 = h
         if opt.vgg_choose == "conv4_3":

@@ -126,7 +126,7 @@ class TempModel(BaseModel):
         self.input_img.resize_(input_img.size()).copy_(input_img)
         self.image_paths = input['A_paths' if AtoB else 'B_paths']
 
-    
+
 
 
     def test(self):
@@ -188,7 +188,7 @@ class TempModel(BaseModel):
         if self.opt.use_wgan:
             loss_D_real = pred_real.mean()
             loss_D_fake = pred_fake.mean()
-            loss_D = loss_D_fake - loss_D_real + self.criterionGAN.calc_gradient_penalty(netD, 
+            loss_D = loss_D_fake - loss_D_real + self.criterionGAN.calc_gradient_penalty(netD,
                                                 real.data, fake.data)
         elif self.opt.use_ragan and use_ragan:
             loss_D = (self.criterionGAN(pred_real - torch.mean(pred_fake), True) +
@@ -205,7 +205,7 @@ class TempModel(BaseModel):
         fake_B = self.fake_B
         self.loss_D_A = self.backward_D_basic(self.netD_A, self.real_B, fake_B, True)
         self.loss_D_A.backward()
-    
+
     def backward_D_P(self):
         if self.opt.hybrid_loss:
             loss_D_P = self.backward_D_basic(self.netD_P, self.real_patch, self.fake_patch, False)
@@ -290,10 +290,10 @@ class TempModel(BaseModel):
 
             self.loss_G_A = (self.criterionGAN(pred_real - torch.mean(pred_fake), False) +
                                       self.criterionGAN(pred_fake - torch.mean(pred_real), True)) / 2
-            
+
         else:
             self.loss_G_A = self.criterionGAN(pred_fake, True)
-        
+
         loss_G_A = 0
         if self.opt.patchD:
             pred_fake_patch = self.netD_P.forward(self.fake_patch)
@@ -301,66 +301,66 @@ class TempModel(BaseModel):
                 loss_G_A += self.criterionGAN(pred_fake_patch, True)
             else:
                 pred_real_patch = self.netD_P.forward(self.real_patch)
-                
+
                 loss_G_A += (self.criterionGAN(pred_real_patch - torch.mean(pred_fake_patch), False) +
                                       self.criterionGAN(pred_fake_patch - torch.mean(pred_real_patch), True)) / 2
             self.loss_G_A += loss_G_A
-        if self.opt.patchD_3 > 0:   
+        if self.opt.patchD_3 > 0:
             for i in range(self.opt.patchD_3):
                 pred_fake_patch_1 = self.netD_P.forward(self.fake_patch_1[i])
                 if self.opt.hybrid_loss:
                     loss_G_A += self.criterionGAN(pred_fake_patch_1, True)
                 else:
                     pred_real_patch_1 = self.netD_P.forward(self.real_patch_1[i])
-                    
+
                     loss_G_A += (self.criterionGAN(pred_real_patch_1 - torch.mean(pred_fake_patch_1), False) +
                                         self.criterionGAN(pred_fake_patch_1 - torch.mean(pred_real_patch_1), True)) / 2
-                    
+
             if not self.opt.D_P_times2:
                 self.loss_G_A += loss_G_A/float(self.opt.patchD_3 + 1)
             else:
                 self.loss_G_A += loss_G_A/float(self.opt.patchD_3 + 1)*2
         else:
             if not self.opt.D_P_times2:
-        self.loss_G_A += loss_G_A
+                self.loss_G_A += loss_G_A
             else:
                 self.loss_G_A += loss_G_A*2
-                
+
         if epoch < 0:
             vgg_w = 0
         else:
             vgg_w = 1
         if self.opt.vgg > 0:
-            self.loss_vgg_b = self.vgg_loss.compute_vgg_loss(self.vgg, 
+            self.loss_vgg_b = self.vgg_loss.compute_vgg_loss(self.vgg,
                     self.fake_B, self.real_A) * self.opt.vgg if self.opt.vgg > 0 else 0
             if self.opt.patch_vgg:
                 if not self.opt.IN_vgg:
-                    loss_vgg_patch = self.vgg_loss.compute_vgg_loss(self.vgg, 
+                    loss_vgg_patch = self.vgg_loss.compute_vgg_loss(self.vgg,
                     self.fake_patch, self.input_patch) * self.opt.vgg
                 else:
-                    loss_vgg_patch = self.vgg_patch_loss.compute_vgg_loss(self.vgg, 
+                    loss_vgg_patch = self.vgg_patch_loss.compute_vgg_loss(self.vgg,
                     self.fake_patch, self.input_patch) * self.opt.vgg
                 if self.opt.patchD_3 > 0:
                     for i in range(self.opt.patchD_3):
                         if not self.opt.IN_vgg:
-                            loss_vgg_patch += self.vgg_loss.compute_vgg_loss(self.vgg, 
+                            loss_vgg_patch += self.vgg_loss.compute_vgg_loss(self.vgg,
                                 self.fake_patch_1[i], self.input_patch_1[i]) * self.opt.vgg
                         else:
-                            loss_vgg_patch += self.vgg_patch_loss.compute_vgg_loss(self.vgg, 
+                            loss_vgg_patch += self.vgg_patch_loss.compute_vgg_loss(self.vgg,
                                 self.fake_patch_1[i], self.input_patch_1[i]) * self.opt.vgg
                     self.loss_vgg_b += loss_vgg_patch/float(self.opt.patchD_3 + 1)
                 else:
                     self.loss_vgg_b += loss_vgg_patch
             self.loss_G = self.loss_G_A + self.loss_vgg_b*vgg_w
         elif self.opt.fcn > 0:
-            self.loss_fcn_b = self.fcn_loss.compute_fcn_loss(self.fcn, 
+            self.loss_fcn_b = self.fcn_loss.compute_fcn_loss(self.fcn,
                     self.fake_B, self.real_A) * self.opt.fcn if self.opt.fcn > 0 else 0
             if self.opt.patchD:
-                loss_fcn_patch = self.fcn_loss.compute_vgg_loss(self.fcn, 
+                loss_fcn_patch = self.fcn_loss.compute_vgg_loss(self.fcn,
                     self.fake_patch, self.input_patch) * self.opt.fcn
                 if self.opt.patchD_3 > 0:
                     for i in range(self.opt.patchD_3):
-                        loss_fcn_patch += self.fcn_loss.compute_vgg_loss(self.fcn, 
+                        loss_fcn_patch += self.fcn_loss.compute_vgg_loss(self.fcn,
                             self.fake_patch_1[i], self.input_patch_1[i]) * self.opt.fcn
                     self.loss_fcn_b += loss_fcn_patch/float(self.opt.patchD_3 + 1)
                 else:
@@ -420,7 +420,7 @@ class TempModel(BaseModel):
         elif self.opt.fcn > 0:
             fcn = self.loss_fcn_b.data[0]/self.opt.fcn if self.opt.fcn > 0 else 0
             return OrderedDict([('D_A', D_A), ('G_A', G_A), ("fcn", fcn)])
-        
+
 
     def get_current_visuals(self):
         real_A = util.tensor2im(self.real_A.data)
@@ -481,7 +481,7 @@ class TempModel(BaseModel):
         # self.save_network(self.netD_B, 'D_B', label, self.gpu_ids)
 
     def update_learning_rate(self):
-        
+
         if self.opt.new_lr:
             lr = self.old_lr/2
         else:

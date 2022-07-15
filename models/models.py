@@ -18,6 +18,7 @@ def create_model(opt):
         from .Unet_L1 import PairModel
         model = PairModel()
     elif opt.model == 'single':
+        # 训练时走的是singleGANModel
         # assert(opt.dataset_mode == 'unaligned')
         from .single_model import SingleModel
         model = SingleModel()

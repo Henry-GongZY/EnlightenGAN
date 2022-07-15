@@ -1,5 +1,6 @@
 from .base_options import BaseOptions
 
+# 继承了BaseOptions，然后添加了test中需要的参数
 
 class TestOptions(BaseOptions):
     def initialize(self):

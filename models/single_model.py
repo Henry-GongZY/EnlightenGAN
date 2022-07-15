@@ -22,10 +22,10 @@ class SingleModel(BaseModel):
 
     def initialize(self, opt):
         BaseModel.initialize(self, opt)
-
         nb = opt.batchSize
         size = opt.fineSize
         self.opt = opt
+        # batchsize 通道数 finesize
         self.input_A = self.Tensor(nb, opt.input_nc, size, size)
         self.input_B = self.Tensor(nb, opt.output_nc, size, size)
         self.input_img = self.Tensor(nb, opt.input_nc, size, size)
