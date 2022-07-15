@@ -22,6 +22,9 @@ def is_image_file(filename):
 
 # 提取dir下所有图片
 def make_dataset(dir):
+    """
+    images: 图像路径
+    """
     images = []
     assert os.path.isdir(dir), '%s is not a valid directory' % dir
 
@@ -33,12 +36,17 @@ def make_dataset(dir):
 
     return images
 
-# 
+# 根据输入目录生成目录下的图片和图片名数组（一一对应）
 def store_dataset(dir):
+    """
+    images:读取后的图像数据
+    all_path:图像路径
+    """
     images = []
     all_path = []
     assert os.path.isdir(dir), '%s is not a valid directory' % dir
-
+    
+    # 根目录，文件夹，文件名
     for root, _, fnames in sorted(os.walk(dir)):
         for fname in fnames:
             if is_image_file(fname):
@@ -69,7 +77,8 @@ class ImageFolder(data.Dataset):
         self.transform = transform
         self.return_paths = return_paths
         self.loader = loader
-
+    
+    # 根据下标读取对应图片，并使用transform进行处理
     def __getitem__(self, index):
         path = self.imgs[index]
         img = self.loader(path)
