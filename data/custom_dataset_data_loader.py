@@ -47,6 +47,7 @@ class CustomDatasetDataLoader(BaseDataLoader):
         batchsize: 一次处理的数据量
         shuffle: 是否打乱
         num_workers: 工作线程数
+        工作方法：通过Dataset类的 __getitem__ 函数获取单个数据，然后组合成batch
         """
         self.dataloader = torch.utils.data.DataLoader(
             self.dataset,

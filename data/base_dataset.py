@@ -41,6 +41,7 @@ def get_transform(opt):
         # 训练的时候有这一项
         transform_list.append(transforms.RandomHorizontalFlip())
 
+    # 将灰度值范围从 0~255 变为 -1~1
     transform_list += [transforms.ToTensor(),
                        transforms.Normalize((0.5, 0.5, 0.5),
                                             (0.5, 0.5, 0.5))]

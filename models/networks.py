@@ -193,8 +193,6 @@ class GANLoss(nn.Module):
         target_tensor = self.get_target_tensor(input, target_is_real)
         return self.loss(input, target_tensor)
 
-
-
 class DiscLossWGANGP():
     def __init__(self):
         self.LAMBDA = 10
@@ -929,6 +927,7 @@ class DnCNN(nn.Module):
                 init.constant_(m.weight, 1)
                 init.constant_(m.bias, 0)
 
+# 整个VGG16网络
 class Vgg16(nn.Module):
     def __init__(self):
         super(Vgg16, self).__init__()
@@ -1007,6 +1006,7 @@ def vgg_preprocess(batch, opt):
     (r, g, b) = torch.chunk(batch, 3, dim = 1)
     batch = torch.cat((b, g, r), dim = 1) # convert RGB to BGR
     batch = (batch + 1) * 255 * 0.5 # [-1, 1] -> [0, 255]
+    # 这个没有使用
     if opt.vgg_mean:
         mean = tensortype(batch.data.size())
         mean[:, 0, :, :] = 103.939
@@ -1035,14 +1035,6 @@ def load_vgg16(model_dir, gpu_ids):
     """ Use the model from https://github.com/abhiskk/fast-neural-style/blob/master/neural_style/utils.py """
     if not os.path.exists(model_dir):
         os.mkdir(model_dir)
-    # if not os.path.exists(os.path.join(model_dir, 'vgg16.weight')):
-    #     if not os.path.exists(os.path.join(model_dir, 'vgg16.t7')):
-    #         os.system('wget https://www.dropbox.com/s/76l3rt4kyi3s8x7/vgg16.t7?dl=1 -O ' + os.path.join(model_dir, 'vgg16.t7'))
-    #     vgglua = load_lua(os.path.join(model_dir, 'vgg16.t7'))
-    #     vgg = Vgg16()
-    #     for (src, dst) in zip(vgglua.parameters()[0], vgg.parameters()):
-    #         dst.data[:] = src
-    #     torch.save(vgg.state_dict(), os.path.join(model_dir, 'vgg16.weight'))
     vgg = Vgg16()
     # vgg.cuda()
     vgg.cuda(device=gpu_ids[0])

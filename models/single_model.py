@@ -22,10 +22,16 @@ class SingleModel(BaseModel):
 
     def initialize(self, opt):
         BaseModel.initialize(self, opt)
-        nb = opt.batchSize
-        size = opt.fineSize
+        nb = opt.batchSize  #32
+        size = opt.fineSize   #320
         self.opt = opt
         # batchsize 通道数 finesize
+        '''
+        self.input_A: 32个320*320的3通道图像
+        self.input_B: 32个320*320的3通道图像
+        self.input_img: 32个320*320的3通道图像
+        self.input_A_grey: 32个320*320的单通道灰度图
+        '''
         self.input_A = self.Tensor(nb, opt.input_nc, size, size)
         self.input_B = self.Tensor(nb, opt.output_nc, size, size)
         self.input_img = self.Tensor(nb, opt.input_nc, size, size)
@@ -41,6 +47,7 @@ class SingleModel(BaseModel):
             self.vgg.eval()
             for param in self.vgg.parameters():
                 param.requires_grad = False
+        # 这个没有用到
         elif opt.fcn > 0:
             self.fcn_loss = networks.SemanticLoss(opt)
             self.fcn_loss.cuda()
