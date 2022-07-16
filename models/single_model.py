@@ -79,10 +79,12 @@ class SingleModel(BaseModel):
             self.netD_A = networks.define_D(opt.output_nc, opt.ndf,
                                             opt.which_model_netD,
                                             opt.n_layers_D, opt.norm, use_sigmoid, self.gpu_ids, False)
+            '''定义局部判别器层，这里使用的是no_norm_4,n_layers_D = 4'''
             if self.opt.patchD:
                 self.netD_P = networks.define_D(opt.input_nc, opt.ndf,
                                             opt.which_model_netD,
                                             opt.n_layers_patchD, opt.norm, use_sigmoid, self.gpu_ids, True)
+        # 训练的话就不用这一部分了
         if not self.isTrain or opt.continue_train:
             which_epoch = opt.which_epoch
             self.load_network(self.netG_A, 'G_A', which_epoch)
