@@ -14,14 +14,18 @@ opt = TrainOptions().parse()
 #加载配置选项
 config = get_config(opt.config)
 
-#加载数据 (unaligned loader)
+# 加载数据 (unaligned loader)
+# 使用CustomDatasetDataLoader进行了init
+# dataset mode is unaligned
 data_loader = CreateDataLoader(opt)
+# 返回一个DataLoader
 dataset = data_loader.load_data()
 dataset_size = len(data_loader)
 print('#training images = %d' % dataset_size)
 
 #创建模型 (singleGANModel)
 model = create_model(opt)
+
 #创建可视化
 visualizer = Visualizer(opt)
 

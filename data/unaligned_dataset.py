@@ -74,6 +74,7 @@ class UnalignedDataset(BaseDataset):
         self.A_size = len(self.A_paths)
         self.B_size = len(self.B_paths)
 
+        #初始化图像transform
         self.transform = get_transform(opt)
 
     def __getitem__(self, index):

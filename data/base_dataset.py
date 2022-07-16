@@ -38,11 +38,13 @@ def get_transform(opt):
     #     transform_list.append(transforms.Scale(osize, Image.BICUBIC))
 
     if opt.isTrain and not opt.no_flip:
+        # 训练的时候有这一项
         transform_list.append(transforms.RandomHorizontalFlip())
 
     transform_list += [transforms.ToTensor(),
                        transforms.Normalize((0.5, 0.5, 0.5),
                                             (0.5, 0.5, 0.5))]
+    # 融合多个步骤
     return transforms.Compose(transform_list)
 
 def __scale_width(img, target_width):

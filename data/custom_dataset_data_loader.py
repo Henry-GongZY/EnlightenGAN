@@ -29,7 +29,7 @@ def CreateDataset(opt):
         raise ValueError("Dataset [%s] not recognized." % opt.dataset_mode)
 
     print("dataset [%s] was created" % (dataset.name()))
-    # 读取图片在这里处理
+    # 读取图片操作在这里进行
     dataset.initialize(opt)
     return dataset
 

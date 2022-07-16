@@ -114,6 +114,7 @@ class SingleModel(BaseModel):
             # self.netG_B.eval()
         print('-----------------------------------------------')
 
+    # 方向，这里默认是AtoB，即模型会学习由A想B的图像变换
     def set_input(self, input):
         AtoB = self.opt.which_direction == 'AtoB'
         input_A = input['A' if AtoB else 'B']
