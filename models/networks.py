@@ -99,6 +99,7 @@ def define_G(input_nc, output_nc, ngf, which_model_netG, norm='batch', use_dropo
         netG = Unet(opt, skip)
     elif which_model_netG == 'sid_unet_shuffle':
         netG = Unet_pixelshuffle(opt, skip)
+    # 走的这个
     elif which_model_netG == 'sid_unet_resize':
         netG = Unet_resize_conv(opt, skip)
     elif which_model_netG == 'DnCNN':
@@ -126,6 +127,7 @@ def define_D(input_nc, ndf, which_model_netD,
         netD = NLayerDiscriminator(input_nc, ndf, n_layers_D, norm_layer=norm_layer, use_sigmoid=use_sigmoid, gpu_ids=gpu_ids)
     elif which_model_netD == 'no_norm':
         netD = NoNormDiscriminator(input_nc, ndf, n_layers_D, use_sigmoid=use_sigmoid, gpu_ids=gpu_ids)
+    # 训练时走的是这个
     elif which_model_netD == 'no_norm_4':
         netD = NoNormDiscriminator(input_nc, ndf, n_layers_D, use_sigmoid=use_sigmoid, gpu_ids=gpu_ids)
     elif which_model_netD == 'no_patchgan':
@@ -492,6 +494,7 @@ class NLayerDiscriminator(nn.Module):
         # else:
         return self.model(input)
 
+
 class NoNormDiscriminator(nn.Module):
     def __init__(self, input_nc, ndf=64, n_layers=3, use_sigmoid=False, gpu_ids=[]):
         super(NoNormDiscriminator, self).__init__()
@@ -506,6 +509,7 @@ class NoNormDiscriminator(nn.Module):
 
         nf_mult = 1
         nf_mult_prev = 1
+        # 循环4次
         for n in range(1, n_layers):
             nf_mult_prev = nf_mult
             nf_mult = min(2**n, 8)
@@ -588,6 +592,7 @@ class FCDiscriminator(nn.Module):
             output = self.sigmoid(output)
         return output
 
+# 生成器使用的UNet
 class Unet_resize_conv(nn.Module):
     def __init__(self, opt, skip):
         super(Unet_resize_conv, self).__init__()
@@ -596,9 +601,13 @@ class Unet_resize_conv(nn.Module):
         self.skip = skip
         p = 1
         # self.conv1_1 = nn.Conv2d(4, 32, 3, padding=p)
+        '''编码器部分
+        下面是连续的 4组 'c-l-b-c-l-b-m' 和一个 'c-l-b'
+        '''
         if opt.self_attention:
             self.conv1_1 = nn.Conv2d(4, 32, 3, padding=p)
             # self.conv1_1 = nn.Conv2d(3, 32, 3, padding=p)
+            """这里的几个池化层主要是对灰度图（自正则图）进行下采样"""
             self.downsample_1 = nn.MaxPool2d(2)
             self.downsample_2 = nn.MaxPool2d(2)
             self.downsample_3 = nn.MaxPool2d(2)
@@ -606,6 +615,7 @@ class Unet_resize_conv(nn.Module):
         else:
             self.conv1_1 = nn.Conv2d(3, 32, 3, padding=p)
         self.LReLU1_1 = nn.LeakyReLU(0.2, inplace=True)
+        # 这里使用的就是 Batch Normalization
         if self.opt.use_norm == 1:
             self.bn1_1 = SynBN2d(32) if self.opt.syn_norm else nn.BatchNorm2d(32)
         self.conv1_2 = nn.Conv2d(32, 32, 3, padding=p)
@@ -648,6 +658,10 @@ class Unet_resize_conv(nn.Module):
         self.LReLU5_1 = nn.LeakyReLU(0.2, inplace=True)
         if self.opt.use_norm == 1:
             self.bn5_1 = SynBN2d(512) if self.opt.syn_norm else nn.BatchNorm2d(512)
+
+        '''解码器部分
+        下面是一个 'c-l-b' 和连续的 'c-l-b-c-l-b-u'，最后一个conv输出
+        '''
         self.conv5_2 = nn.Conv2d(512, 512, 3, padding=p)
         self.LReLU5_2 = nn.LeakyReLU(0.2, inplace=True)
         if self.opt.use_norm == 1:
@@ -1035,11 +1049,14 @@ def load_vgg16(model_dir, gpu_ids):
     """ Use the model from https://github.com/abhiskk/fast-neural-style/blob/master/neural_style/utils.py """
     if not os.path.exists(model_dir):
         os.mkdir(model_dir)
+    #生成网络
     vgg = Vgg16()
-    # vgg.cuda()
     vgg.cuda(device=gpu_ids[0])
+    # 加载预训练模型
     vgg.load_state_dict(torch.load(os.path.join(model_dir, 'vgg16.weight')))
+    # 多卡并行
     vgg = torch.nn.DataParallel(vgg, gpu_ids)
+    # 返回网络本体 (nn.Module)
     return vgg
 
 

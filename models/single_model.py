@@ -37,16 +37,22 @@ class SingleModel(BaseModel):
         self.input_img = self.Tensor(nb, opt.input_nc, size, size)
         self.input_A_gray = self.Tensor(nb, 1, size, size)
 
+        # 初始化VGG网络作为评估器，并加载预训练模型
         if opt.vgg > 0:
             self.vgg_loss = networks.PerceptualLoss(opt)
+            # 没有用到
             if self.opt.IN_vgg:
                 self.vgg_patch_loss = networks.PerceptualLoss(opt)
                 self.vgg_patch_loss.cuda()
+
             self.vgg_loss.cuda()
+            # 初始化VGG16网络，加载VGG预训练模型，送进GPU
             self.vgg = networks.load_vgg16("./model", self.gpu_ids)
+            # 将VGG模型设置为评估模式
             self.vgg.eval()
             for param in self.vgg.parameters():
                 param.requires_grad = False
+
         # 这个没有用到
         elif opt.fcn > 0:
             self.fcn_loss = networks.SemanticLoss(opt)
@@ -58,15 +64,18 @@ class SingleModel(BaseModel):
         # load/define networks
         # The naming conversion is different from those used in the paper
         # Code (paper): G_A (G), G_B (F), D_A (D_Y), D_B (D_X)
-
+        '''这里的 which_model_netG 使用的是 sid_unet_resize，norm 是 instance'''
         skip = True if opt.skip > 0 else False
+        '''定义生成器，这里使用的是A-UNet'''
         self.netG_A = networks.define_G(opt.input_nc, opt.output_nc,
                                         opt.ngf, opt.which_model_netG, opt.norm, not opt.no_dropout, self.gpu_ids, skip=skip, opt=opt)
         # self.netG_B = networks.define_G(opt.output_nc, opt.input_nc,
         #                                 opt.ngf, opt.which_model_netG, opt.norm, not opt.no_dropout, self.gpu_ids, skip=False, opt=opt)
 
         if self.isTrain:
+            '''这里使用的是lsgan'''
             use_sigmoid = opt.no_lsgan
+            '''定义全局判别器，这里使用的是no_norm_4,n_layers_D = 5'''
             self.netD_A = networks.define_D(opt.output_nc, opt.ndf,
                                             opt.which_model_netD,
                                             opt.n_layers_D, opt.norm, use_sigmoid, self.gpu_ids, False)
