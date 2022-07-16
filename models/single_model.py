@@ -95,8 +95,10 @@ class SingleModel(BaseModel):
                     self.load_network(self.netD_P, 'D_P', which_epoch)
 
         if self.isTrain:
+            '''设置学习率'''
             self.old_lr = opt.lr
             # self.fake_A_pool = ImagePool(opt.pool_size)
+            '''池子: 50'''
             self.fake_B_pool = ImagePool(opt.pool_size)
             # define loss functions
             if opt.use_wgan:
