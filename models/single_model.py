@@ -104,13 +104,13 @@ class SingleModel(BaseModel):
             if opt.use_wgan:
                 self.criterionGAN = networks.DiscLossWGANGP()
             else:
-                '''使用的是这个损失函数'''
+                '''使用的是这个损失函数，本质是MSELoss'''
                 self.criterionGAN = networks.GANLoss(use_lsgan=not opt.no_lsgan, tensor=self.Tensor)
 
             if opt.use_mse:
                 self.criterionCycle = torch.nn.MSELoss()
             else:
-                '''使用的是这个损失函数'''
+                '''使用的是这个损失函数,本质是L1loss'''
                 self.criterionCycle = torch.nn.L1Loss()
 
             self.criterionL1 = torch.nn.L1Loss()
@@ -269,9 +269,12 @@ class SingleModel(BaseModel):
         # 没有使用
         if self.opt.input_linear:
             self.real_A = (self.real_A - torch.min(self.real_A))/(torch.max(self.real_A) - torch.min(self.real_A))
-        '''train使用了'''
+        '''train使用如下分支'''
         if self.opt.skip == 1:
-            # TODO:重要的一步
+            '''重要的一步，将暗光真实图像和灰度图输入网络
+            fake_B: 生成器输出
+            latent_real_A: 神经网络输出 * 灰度图的结果，未叠加原图
+            '''
             self.fake_B, self.latent_real_A = self.netG_A.forward(self.real_img, self.real_A_gray)
         else:
             self.fake_B = self.netG_A.forward(self.real_img, self.real_A_gray)
@@ -312,17 +315,20 @@ class SingleModel(BaseModel):
             #        w_offset_2:w_offset_2 + self.opt.patchSize]
             # self.input_patch_2 = self.real_A[:,:, h_offset_2:h_offset_2 + self.opt.patchSize,
             #        w_offset_2:w_offset_2 + self.opt.patchSize]
-
+    '''
+    criterionGAN: 
+    '''
     def backward_G(self, epoch):
+
         pred_fake = self.netD_A.forward(self.fake_B)
         if self.opt.use_wgan:
             self.loss_G_A = -pred_fake.mean()
+            '''三个分支里走了raGAN'''
         elif self.opt.use_ragan:
             pred_real = self.netD_A.forward(self.real_B)
 
             self.loss_G_A = (self.criterionGAN(pred_real - torch.mean(pred_fake), False) +
                                       self.criterionGAN(pred_fake - torch.mean(pred_real), True)) / 2
-
         else:
             self.loss_G_A = self.criterionGAN(pred_fake, True)
 

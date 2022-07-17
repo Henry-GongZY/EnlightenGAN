@@ -749,7 +749,7 @@ class Unet_resize_conv(nn.Module):
             # pass
         input, pad_left, pad_right, pad_top, pad_bottom = pad_tensor(input)
         gray, pad_left, pad_right, pad_top, pad_bottom = pad_tensor(gray)
-        # 自正则注意力图
+        '''自正则注意力图，下采样灰度图以适配UNet特征图'''
         if self.opt.self_attention:
             gray_2 = self.downsample_1(gray)
             gray_3 = self.downsample_2(gray_2)
@@ -809,7 +809,7 @@ class Unet_resize_conv(nn.Module):
 
             '''最后灰度图和生成图进行乘法'''
             if self.opt.times_residual:
-                latent = latent*gray
+                latent = latent * gray
             '''以下很多没执行'''
             if self.opt.tanh:
                 latent = self.tanh(latent)
@@ -828,7 +828,7 @@ class Unet_resize_conv(nn.Module):
                     elif self.opt.latent_norm:
                         latent = (latent - torch.min(latent))/(torch.max(latent)-torch.min(latent))
                     '''就执行了这一句'''
-                    output = latent + input*self.opt.skip
+                    output = latent + input * self.opt.skip
             else:
                 output = latent
                 '''没执行'''
@@ -919,6 +919,10 @@ class Unet_resize_conv(nn.Module):
             output = F.upsample(output, scale_factor=2, mode='bilinear')
             gray = F.upsample(gray, scale_factor=2, mode='bilinear')
         if self.skip:
+            '''
+            output: 生成器输出
+            latent: 神经网络输出 * 灰度图的结果，未叠加原图
+            '''
             return output, latent
         else:
             return output
