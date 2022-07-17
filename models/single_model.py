@@ -37,7 +37,7 @@ class SingleModel(BaseModel):
         self.input_img = self.Tensor(nb, opt.input_nc, size, size)
         self.input_A_gray = self.Tensor(nb, 1, size, size)
 
-        # 初始化VGG网络作为评估器，并加载预训练模型
+        '''初始化VGG网络作为评估器，并加载预训练模型'''
         if opt.vgg > 0:
             self.vgg_loss = networks.PerceptualLoss(opt)
             # 没有用到
@@ -46,9 +46,9 @@ class SingleModel(BaseModel):
                 self.vgg_patch_loss.cuda()
 
             self.vgg_loss.cuda()
-            # 初始化VGG16网络，加载VGG预训练模型，送进GPU
+            '''初始化VGG16网络，加载VGG预训练模型，送进GPU'''
             self.vgg = networks.load_vgg16("./model", self.gpu_ids)
-            # 将VGG模型设置为评估模式
+            '''将VGG模型设置为评估模式'''
             self.vgg.eval()
             for param in self.vgg.parameters():
                 param.requires_grad = False
@@ -98,20 +98,25 @@ class SingleModel(BaseModel):
             '''设置学习率'''
             self.old_lr = opt.lr
             # self.fake_A_pool = ImagePool(opt.pool_size)
-            '''池子: 50'''
             self.fake_B_pool = ImagePool(opt.pool_size)
             # define loss functions
+
             if opt.use_wgan:
                 self.criterionGAN = networks.DiscLossWGANGP()
             else:
+                '''使用的是这个损失函数'''
                 self.criterionGAN = networks.GANLoss(use_lsgan=not opt.no_lsgan, tensor=self.Tensor)
+
             if opt.use_mse:
                 self.criterionCycle = torch.nn.MSELoss()
             else:
+                '''使用的是这个损失函数'''
                 self.criterionCycle = torch.nn.L1Loss()
+
             self.criterionL1 = torch.nn.L1Loss()
             self.criterionIdt = torch.nn.L1Loss()
-            # initialize optimizers
+
+            '''使用Adam优化器'''
             self.optimizer_G = torch.optim.Adam(self.netG_A.parameters(),
                                                 lr=opt.lr, betas=(opt.beta1, 0.999))
             self.optimizer_D_A = torch.optim.Adam(self.netD_A.parameters(), lr=opt.lr, betas=(opt.beta1, 0.999))
@@ -256,15 +261,21 @@ class SingleModel(BaseModel):
         self.real_B = Variable(self.input_B)
         self.real_A_gray = Variable(self.input_A_gray)
         self.real_img = Variable(self.input_img)
+        '''Variable包装'''
+        # 没有使用
         if self.opt.noise > 0:
             self.noise = Variable(torch.cuda.FloatTensor(self.real_A.size()).normal_(mean=0, std=self.opt.noise/255.))
             self.real_A = self.real_A + self.noise
+        # 没有使用
         if self.opt.input_linear:
             self.real_A = (self.real_A - torch.min(self.real_A))/(torch.max(self.real_A) - torch.min(self.real_A))
+        '''train使用了'''
         if self.opt.skip == 1:
+            # TODO:重要的一步
             self.fake_B, self.latent_real_A = self.netG_A.forward(self.real_img, self.real_A_gray)
         else:
             self.fake_B = self.netG_A.forward(self.real_img, self.real_A_gray)
+
         if self.opt.patchD:
             w = self.real_A.size(3)
             h = self.real_A.size(2)
@@ -414,6 +425,12 @@ class SingleModel(BaseModel):
         # forward
         self.forward()
         # G_A and G_B
+        """
+        标准流程：
+        1.梯度归零
+        2.反向传播计算得到每个参数的梯度值
+        3.梯度下降更新参数
+        """
         self.optimizer_G.zero_grad()
         self.backward_G(epoch)
         self.optimizer_G.step()

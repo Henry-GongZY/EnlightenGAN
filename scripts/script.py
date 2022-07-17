@@ -16,6 +16,7 @@ opt = parser.parse_args()
    niter_decay: 100
    resize_or_crop: crop
    batchSize: 32
+   no_lsgan: False
 """
 if opt.train:
 	os.system("python train.py \

@@ -17,7 +17,7 @@ def pad_tensor(input):
 
     height_org, width_org = input.shape[2], input.shape[3]
     divide = 16
-
+    '''前面这部分是对称裁切'''
     if width_org % divide != 0 or height_org % divide != 0:
 
         width_res = width_org % divide
@@ -37,7 +37,7 @@ def pad_tensor(input):
         else:
             pad_top = 0
             pad_bottom = 0
-
+        '''对称翻转填充'''
         padding = nn.ReflectionPad2d((pad_left, pad_right, pad_top, pad_bottom))
         input = padding(input)
     else:
@@ -99,7 +99,7 @@ def define_G(input_nc, output_nc, ngf, which_model_netG, norm='batch', use_dropo
         netG = Unet(opt, skip)
     elif which_model_netG == 'sid_unet_shuffle':
         netG = Unet_pixelshuffle(opt, skip)
-    # 走的这个
+        '''走的这个'''
     elif which_model_netG == 'sid_unet_resize':
         netG = Unet_resize_conv(opt, skip)
     elif which_model_netG == 'DnCNN':
@@ -163,6 +163,7 @@ class GANLoss(nn.Module):
     def __init__(self, use_lsgan=True, target_real_label=1.0, target_fake_label=0.0,
                  tensor=torch.FloatTensor):
         super(GANLoss, self).__init__()
+        '''1为真，0为假'''
         self.real_label = target_real_label
         self.fake_label = target_fake_label
         self.real_label_var = None
@@ -626,7 +627,7 @@ class Unet_resize_conv(nn.Module):
         else:
             self.conv1_1 = nn.Conv2d(3, 32, 3, padding=p)
         self.LReLU1_1 = nn.LeakyReLU(0.2, inplace=True)
-        # 这里使用的就是 Batch Normalization
+        '''这里使用的就是 Batch Normalization'''
         if self.opt.use_norm == 1:
             self.bn1_1 = SynBN2d(32) if self.opt.syn_norm else nn.BatchNorm2d(32)
         self.conv1_2 = nn.Conv2d(32, 32, 3, padding=p)
@@ -748,6 +749,7 @@ class Unet_resize_conv(nn.Module):
             # pass
         input, pad_left, pad_right, pad_top, pad_bottom = pad_tensor(input)
         gray, pad_left, pad_right, pad_top, pad_bottom = pad_tensor(gray)
+        # 自正则注意力图
         if self.opt.self_attention:
             gray_2 = self.downsample_1(gray)
             gray_3 = self.downsample_2(gray_2)
@@ -755,10 +757,11 @@ class Unet_resize_conv(nn.Module):
             gray_5 = self.downsample_4(gray_4)
         if self.opt.use_norm == 1:
             if self.opt.self_attention:
+                '''特征拼接，经过第一套 c-l-b '''
                 x = self.bn1_1(self.LReLU1_1(self.conv1_1(torch.cat((input, gray), 1))))
-                # x = self.bn1_1(self.LReLU1_1(self.conv1_1(input)))
             else:
                 x = self.bn1_1(self.LReLU1_1(self.conv1_1(input)))
+
             conv1 = self.bn1_2(self.LReLU1_2(self.conv1_2(x)))
             x = self.max_pool1(conv1)
 
@@ -804,10 +807,10 @@ class Unet_resize_conv(nn.Module):
 
             latent = self.conv10(conv9)
 
+            '''最后灰度图和生成图进行乘法'''
             if self.opt.times_residual:
                 latent = latent*gray
-
-            # output = self.depth_to_space(conv10, 2)
+            '''以下很多没执行'''
             if self.opt.tanh:
                 latent = self.tanh(latent)
             if self.skip:
@@ -824,10 +827,11 @@ class Unet_resize_conv(nn.Module):
                         latent = F.relu(latent)
                     elif self.opt.latent_norm:
                         latent = (latent - torch.min(latent))/(torch.max(latent)-torch.min(latent))
+                    '''就执行了这一句'''
                     output = latent + input*self.opt.skip
             else:
                 output = latent
-
+                '''没执行'''
             if self.opt.linear:
                 output = output/torch.max(torch.abs(output))
 
