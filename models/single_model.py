@@ -279,7 +279,9 @@ class SingleModel(BaseModel):
         else:
             self.fake_B = self.netG_A.forward(self.real_img, self.real_A_gray)
 
+           '''使用局部判别器'''
         if self.opt.patchD:
+
             w = self.real_A.size(3)
             h = self.real_A.size(2)
             w_offset = random.randint(0, max(0, w - self.opt.patchSize - 1))
@@ -291,6 +293,7 @@ class SingleModel(BaseModel):
                    w_offset:w_offset + self.opt.patchSize]
             self.input_patch = self.real_A[:,:, h_offset:h_offset + self.opt.patchSize,
                    w_offset:w_offset + self.opt.patchSize]
+            '''剪裁数量'''
         if self.opt.patchD_3 > 0:
             self.fake_patch_1 = []
             self.real_patch_1 = []
@@ -319,23 +322,27 @@ class SingleModel(BaseModel):
     criterionGAN: 
     '''
     def backward_G(self, epoch):
-
+        '''虚假（生成）图像经过判别器'''
         pred_fake = self.netD_A.forward(self.fake_B)
         if self.opt.use_wgan:
             self.loss_G_A = -pred_fake.mean()
             '''三个分支里走了raGAN'''
         elif self.opt.use_ragan:
+            '''真实图像经过全局判别器'''
             pred_real = self.netD_A.forward(self.real_B)
-
+            '''L_G_Global函数'''
             self.loss_G_A = (self.criterionGAN(pred_real - torch.mean(pred_fake), False) +
                                       self.criterionGAN(pred_fake - torch.mean(pred_real), True)) / 2
         else:
             self.loss_G_A = self.criterionGAN(pred_fake, True)
 
         loss_G_A = 0
+        '''使用局部判别器'''
         if self.opt.patchD:
+            '''虚假图像经过全局判别器'''
             pred_fake_patch = self.netD_P.forward(self.fake_patch)
             if self.opt.hybrid_loss:
+                '''L_G_Local函数'''
                 loss_G_A += self.criterionGAN(pred_fake_patch, True)
             else:
                 pred_real_patch = self.netD_P.forward(self.real_patch)
@@ -346,6 +353,7 @@ class SingleModel(BaseModel):
             for i in range(self.opt.patchD_3):
                 pred_fake_patch_1 = self.netD_P.forward(self.fake_patch_1[i])
                 if self.opt.hybrid_loss:
+                    '''L_G_Local函数'''
                     loss_G_A += self.criterionGAN(pred_fake_patch_1, True)
                 else:
                     pred_real_patch_1 = self.netD_P.forward(self.real_patch_1[i])
